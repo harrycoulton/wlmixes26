@@ -310,7 +310,7 @@ export default function App() {
               onAddTag={() => addTag(a.name)}
               onRemoveTag={(tag) => removeTag(a.name, tag)}
               friendLikers={friendLikersFor(a.name)}
-              friendTags={friendTagsFor(a.name)}
+              friendTags={tab === 'friends' ? friendTagsFor(a.name) : []}
             />
           ))
         )}
