@@ -10,7 +10,6 @@ function encodeLikes(name, likes, tags) {
   const params = new URLSearchParams();
   params.set('friend', name);
   params.set('likes', indices.join(','));
-  // encode tags as idx:tag1,tag2;idx:tag1,tag2
   const tagParts = [];
   ARTISTS.forEach((a, i) => {
     if (tags[a.name] && tags[a.name].length > 0) {
@@ -48,23 +47,33 @@ function decodeFriendFromHash(hash) {
   }
 }
 
-function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag, friendLikers, friendTags }) {
+function ArtistCard({ artist, liked, hidden, tags, onToggleLike, onToggleHidden, onAddTag, onRemoveTag, friendLikers, friendTags }) {
   const isB2b = artist.b2b != null;
 
   return (
-    <div className="artist">
-      <button
-        className={`like-btn${liked ? ' liked' : ''}`}
-        aria-label={`Like ${artist.name}`}
-        onClick={onToggleLike}
-      >
-        {liked ? '\u2665' : '\u2661'}
-      </button>
+    <div className={`artist${hidden ? ' hidden-artist' : ''}`}>
+      <div className="artist-buttons">
+        <button
+          className={`like-btn${liked ? ' liked' : ''}`}
+          aria-label={`Like ${artist.name}`}
+          onClick={onToggleLike}
+        >
+          {liked ? '\u2665' : '\u2661'}
+        </button>
+        <button
+          className={`hide-btn${hidden ? ' is-hidden' : ''}`}
+          aria-label={hidden ? 'Unhide' : 'Hide'}
+          onClick={onToggleHidden}
+        >
+          {hidden ? 'show' : 'hide'}
+        </button>
+      </div>
       <div className="artist-info">
         <div className="artist-row">
           <div className="artist-name">
             {artist.name}
             {isB2b && <span className="b2b-tag">B2B</span>}
+            {hidden && <span className="hidden-tag">hidden</span>}
           </div>
           {artist.mix && (
             <a className="mix-link" href={artist.mix} target="_blank" rel="noreferrer">
@@ -115,12 +124,26 @@ function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag, 
 export default function App() {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('alpha');
   const [likes, setLikes] = useLocalStorage('wl2026-likes', {});
+  const [hiddenArtists, setHiddenArtists] = useLocalStorage('wl2026-hidden', {});
   const [allTags, setAllTags] = useLocalStorage('wl2026-tags', {});
   const [friends, setFriends] = useLocalStorage('wl2026-friends', []);
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [copied, setCopied] = useState(false);
   const [importNotice, setImportNotice] = useState(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const goOffline = () => setIsOffline(true);
+    const goOnline = () => setIsOffline(false);
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    return () => {
+      window.removeEventListener('offline', goOffline);
+      window.removeEventListener('online', goOnline);
+    };
+  }, []);
 
   useEffect(() => {
     const friend = decodeFriendFromHash(window.location.hash);
@@ -146,6 +169,19 @@ export default function App() {
     if (friend) filtered = filtered.filter(a => friend.likes[a.name]);
   }
 
+  const friendLikeCount = (artistName) => {
+    return friends.filter(f => f.likes[artistName]).length;
+  };
+
+  if (sort === 'friends') {
+    filtered = [...filtered].sort((a, b) => friendLikeCount(b.name) - friendLikeCount(a.name) || a.name.localeCompare(b.name));
+  }
+
+  // Move hidden artists to the bottom
+  const visible = filtered.filter(a => !hiddenArtists[a.name]);
+  const hidden = filtered.filter(a => hiddenArtists[a.name]);
+  const sorted = [...visible, ...hidden];
+
   const friendLikersFor = (artistName) => {
     return friends.filter(f => f.likes[artistName]).map(f => f.name);
   };
@@ -165,8 +201,19 @@ export default function App() {
     countText = `${filtered.length} of ${ARTISTS.length} artists`;
   }
 
+  const hiddenCount = Object.keys(hiddenArtists).length;
+
   const toggleLike = (name) => {
     setLikes(prev => {
+      const next = { ...prev };
+      if (next[name]) delete next[name];
+      else next[name] = true;
+      return next;
+    });
+  };
+
+  const toggleHidden = (name) => {
+    setHiddenArtists(prev => {
       const next = { ...prev };
       if (next[name]) delete next[name];
       else next[name] = true;
@@ -209,6 +256,14 @@ export default function App() {
     }
   };
 
+  const randomMix = () => {
+    const withMix = ARTISTS.filter(a => (a.mix || a.otherMix) && !hiddenArtists[a.name]);
+    if (withMix.length === 0) return;
+    const artist = withMix[Math.floor(Math.random() * withMix.length)];
+    const mixes = [artist.mix, artist.otherMix].filter(Boolean);
+    window.open(mixes[Math.floor(Math.random() * mixes.length)], '_blank');
+  };
+
   const removeFriend = (name) => {
     setFriends(prev => prev.filter(f => f.name !== name));
     if (selectedFriend === name) {
@@ -218,8 +273,12 @@ export default function App() {
 
   return (
     <>
+      {isOffline && (
+        <div className="offline-bar">Offline — showing cached content</div>
+      )}
       <header>
         <h1>WL2026 Mixes</h1>
+        <button className="mystery-btn" onClick={randomMix}>Mystery Mix</button>
         <input
           className="search"
           type="text"
@@ -280,7 +339,28 @@ export default function App() {
         </div>
       )}
 
-      <div className="count">{countText}</div>
+      <div className="toolbar">
+        <div className="count">
+          {countText}
+          {hiddenCount > 0 && ` \u00b7 ${hiddenCount} hidden`}
+        </div>
+        <div className="sort-options">
+          <button
+            className={`sort-btn${sort === 'alpha' ? ' active' : ''}`}
+            onClick={() => setSort('alpha')}
+          >
+            A-Z
+          </button>
+          {friends.length > 0 && (
+            <button
+              className={`sort-btn${sort === 'friends' ? ' active' : ''}`}
+              onClick={() => setSort('friends')}
+            >
+              Popular
+            </button>
+          )}
+        </div>
+      </div>
       <div className="list">
         {tab === 'friends' && !selectedFriend && friends.length === 0 ? (
           <div className="empty">
@@ -291,7 +371,7 @@ export default function App() {
           <div className="empty">
             Select a friend above to see their likes.
           </div>
-        ) : filtered.length === 0 ? (
+        ) : sorted.length === 0 ? (
           <div className="empty">
             {tab === 'liked'
               ? <>No liked artists yet.<br />Tap the heart on artists you want to check out.</>
@@ -300,13 +380,15 @@ export default function App() {
                 : 'No artists match your search.'}
           </div>
         ) : (
-          filtered.map(a => (
+          sorted.map(a => (
             <ArtistCard
               key={a.name}
               artist={a}
               liked={!!likes[a.name]}
+              hidden={!!hiddenArtists[a.name]}
               tags={allTags[a.name] || []}
               onToggleLike={() => toggleLike(a.name)}
+              onToggleHidden={() => toggleHidden(a.name)}
               onAddTag={() => addTag(a.name)}
               onRemoveTag={(tag) => removeTag(a.name, tag)}
               friendLikers={friendLikersFor(a.name)}

@@ -6,6 +6,10 @@ body {
   min-height: 100dvh;
   padding-bottom: 80px;
 }
+.offline-bar {
+  background: #2a1a1a; color: #ff6b6b;
+  text-align: center; padding: 6px; font-size: 12px;
+}
 header {
   position: sticky; top: 0; z-index: 10;
   background: #0a0a0a;
@@ -13,6 +17,22 @@ header {
   border-bottom: 1px solid #1a1a1a;
 }
 h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
+.mystery-btn {
+  width: 100%; padding: 14px;
+  background: #ff6b35; border: none; border-radius: 12px;
+  color: #0a0a0a; font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+  margin-bottom: 10px; letter-spacing: 0.5px;
+}
+.mystery-btn:active { background: #e55a28; transform: scale(0.98); }
+.search {
+  width: 100%; padding: 10px 14px;
+  background: #161616; border: 1px solid #2a2a2a; border-radius: 10px;
+  color: #e0e0e0; font-size: 15px; outline: none;
+  margin-bottom: 10px;
+}
+.search::placeholder { color: #555; }
+.search:focus { border-color: #ff6b35; }
 .tabs {
   display: flex; gap: 0;
 }
@@ -24,14 +44,22 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
   cursor: pointer; transition: all 0.2s;
 }
 .tab.active { color: #fff; border-bottom-color: #ff6b35; }
-.search {
-  width: 100%; padding: 10px 14px;
-  background: #161616; border: 1px solid #2a2a2a; border-radius: 10px;
-  color: #e0e0e0; font-size: 15px; outline: none;
-  margin: 12px 0;
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
 }
-.search::placeholder { color: #555; }
-.search:focus { border-color: #ff6b35; }
+.count {
+  font-size: 12px; color: #555;
+}
+.sort-options {
+  display: flex; gap: 4px;
+}
+.sort-btn {
+  font-size: 11px; padding: 4px 10px;
+  background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px;
+  color: #666; cursor: pointer; transition: all 0.15s;
+}
+.sort-btn.active { color: #ff6b35; border-color: #ff6b35; }
 .list { padding: 8px 0; }
 .artist {
   display: flex; align-items: center; gap: 12px;
@@ -39,9 +67,13 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
   border-bottom: 1px solid #141414;
   transition: background 0.15s;
 }
+.artist.hidden-artist { opacity: 0.35; }
 .artist:active { background: #161616; }
+.artist-buttons {
+  display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;
+}
 .like-btn {
-  width: 38px; height: 38px; flex-shrink: 0;
+  width: 38px; height: 38px;
   background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: all 0.2s;
@@ -49,6 +81,21 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
 }
 .like-btn.liked {
   background: #ff6b35; border-color: #ff6b35; color: #fff;
+}
+.hide-btn {
+  width: 38px; height: 22px;
+  background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 10px; color: #555;
+}
+.hide-btn.is-hidden {
+  background: #2a1a1a; border-color: #ff6b6b; color: #ff6b6b;
+}
+.hidden-tag {
+  font-size: 10px; font-weight: 400; color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.12); padding: 2px 6px;
+  border-radius: 4px; margin-left: 6px; vertical-align: middle;
 }
 .artist-info { flex: 1; min-width: 0; }
 .artist-row {
@@ -99,9 +146,6 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
   transition: all 0.15s; line-height: 1;
 }
 .add-tag-btn:active { background: #2a2a2a; color: #ff6b35; }
-.count {
-  font-size: 12px; color: #555; padding: 8px 16px;
-}
 .friends-bar {
   padding: 12px 16px;
   border-bottom: 1px solid #1a1a1a;
@@ -151,6 +195,7 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
 }
 .friend-likers {
   display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;
+  align-items: center;
 }
 .liked-by-label {
   font-size: 10px; color: #666;
