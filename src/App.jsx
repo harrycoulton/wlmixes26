@@ -4,7 +4,21 @@ import { useLocalStorage } from './useLocalStorage';
 import './App.css';
 
 const LIKE_STICKERS = ['stickers/likes/chris.png', 'stickers/likes/chris2.png', 'stickers/likes/chrolveigtopher.png', 'stickers/likes/david.png', 'stickers/likes/fedeBecauselol.png', 'stickers/likes/hahahah.png', 'stickers/likes/helukibetter.png', 'stickers/likes/lea.png', 'stickers/likes/lool.png', 'stickers/likes/me.png', 'stickers/likes/parisa.png', 'stickers/likes/parisa2.png', 'stickers/likes/rory.png', 'stickers/likes/rory2.png', 'stickers/likes/sebo.png', 'stickers/likes/sebo2.png'];
-const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+function makeShuffler(arr) {
+  let remaining = [];
+  return () => {
+    if (remaining.length === 0) {
+      remaining = [...arr];
+      for (let i = remaining.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+      }
+    }
+    return remaining.pop();
+  };
+}
+const randomSticker = makeShuffler(LIKE_STICKERS);
+const randomSide = makeShuffler(['top', 'bottom', 'left', 'right']);
 
 function encodeLikes(name, likes, tags) {
   const indices = ARTISTS
@@ -217,9 +231,9 @@ export default function App() {
         delete next[name];
       } else {
         next[name] = true;
-        setLikeSticker(randomFrom(LIKE_STICKERS));
+        setLikeSticker(randomSticker());
         setStickerSide({
-          edge: randomFrom(['top', 'bottom', 'left', 'right']),
+          edge: randomSide(),
           offset: Math.floor(Math.random() * 60) + 20, // 20-80%
         });
         setStickerKey(k => k + 1);
