@@ -265,6 +265,7 @@ export default function App() {
   };
 
   const removeFriend = (name) => {
+    if (!confirm(`Remove ${name} as a friend? :(`)) return;
     setFriends(prev => prev.filter(f => f.name !== name));
     if (selectedFriend === name) {
       setSelectedFriend(null);
