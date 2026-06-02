@@ -88,6 +88,25 @@
     text-align: center; padding: 60px 20px;
     color: #444; font-size: 15px;
   }
+  .tags {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;
+    align-items: center;
+  }
+  .tag {
+    font-size: 11px; color: #e0e0e0;
+    background: #2a2a2a; padding: 2px 8px;
+    border-radius: 4px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .tag:active { background: #ff4444; }
+  .add-tag-btn {
+    width: 22px; height: 22px; flex-shrink: 0;
+    background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px; color: #555;
+    transition: all 0.15s; line-height: 1;
+  }
+  .add-tag-btn:active { background: #2a2a2a; color: #ff6b35; }
   .count {
     font-size: 12px; color: #555; padding: 8px 16px;
   }
@@ -180,6 +199,12 @@ function getLikes() {
 function setLikes(likes) {
   localStorage.setItem('wl2026-likes', JSON.stringify(likes));
 }
+function getTags() {
+  try { return JSON.parse(localStorage.getItem('wl2026-tags') || '{}'); } catch { return {}; }
+}
+function setTags(tags) {
+  localStorage.setItem('wl2026-tags', JSON.stringify(tags));
+}
 
 let currentTab = 'all';
 let searchQuery = '';
@@ -231,6 +256,7 @@ function render() {
     return;
   }
 
+  const allTags = getTags();
   listEl.innerHTML = filtered.map(a => {
     const liked = likes[a.name] ? ' liked' : '';
     const isB2b = a.b2b != null;
@@ -243,6 +269,12 @@ function render() {
       ? '<a class="mix-link b2b-mix" href="' + a.b2bMix + '" target="_blank">' + a.b2b + ' mix</a>'
       : '';
 
+    const artistTags = allTags[a.name] || [];
+    const tagsHtml = '<div class="tags">' +
+      artistTags.map(t => '<span class="tag" data-tag="' + t.replace(/"/g, '&quot;') + '">' + t + '</span>').join('') +
+      '<button class="add-tag-btn" aria-label="Add tag">+</button>' +
+    '</div>';
+
     return '<div class="artist" data-name="' + a.name.replace(/"/g, '&quot;') + '">' +
       '<button class="like-btn' + liked + '" aria-label="Like ' + a.name + '">' +
         (likes[a.name] ? '\u2665' : '\u2661') +
@@ -253,6 +285,7 @@ function render() {
           mixLink +
         '</div>' +
         (b2bLink ? '<div class="b2b-links">' + b2bLink + '</div>' : '') +
+        tagsHtml +
       '</div>' +
     '</div>';
   }).join('');
@@ -265,6 +298,35 @@ function render() {
       if (likes[name]) delete likes[name]; else likes[name] = true;
       setLikes(likes);
       render();
+    });
+  });
+
+  listEl.querySelectorAll('.add-tag-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const name = btn.closest('.artist').dataset.name;
+      const tag = prompt('Add tag for ' + name + ':');
+      if (!tag || !tag.trim()) return;
+      const tags = getTags();
+      if (!tags[name]) tags[name] = [];
+      if (!tags[name].includes(tag.trim())) tags[name].push(tag.trim());
+      setTags(tags);
+      render();
+    });
+  });
+
+  listEl.querySelectorAll('.tag').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const name = el.closest('.artist').dataset.name;
+      const tag = el.dataset.tag;
+      const tags = getTags();
+      if (tags[name]) {
+        tags[name] = tags[name].filter(t => t !== tag);
+        if (tags[name].length === 0) delete tags[name];
+        setTags(tags);
+        render();
+      }
     });
   });
 }
