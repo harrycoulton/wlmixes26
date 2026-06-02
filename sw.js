@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wl2026-v2';
+const CACHE_NAME = 'wl2026-v3';
 
 self.addEventListener('install', e => {
   e.waitUntil(

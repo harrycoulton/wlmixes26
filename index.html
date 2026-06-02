@@ -81,6 +81,8 @@
     padding: 4px 10px; border-radius: 6px; white-space: nowrap;
   }
   .mix-link:hover { background: rgba(255, 107, 53, 0.18); }
+  .mix-link.other-mix { color: #a78bfa; background: rgba(167, 139, 250, 0.08); }
+  .mix-link.other-mix:hover { background: rgba(167, 139, 250, 0.18); }
   .mix-link.b2b-mix { color: #6bb5ff; background: rgba(107, 181, 255, 0.08); }
   .mix-link.b2b-mix:hover { background: rgba(107, 181, 255, 0.18); }
   .b2b-links { display: flex; gap: 6px; margin-top: 4px; }
@@ -126,12 +128,12 @@
 
 <script>
 const ARTISTS = [
-  { name: "Avsluta", mix: "https://soundcloud.com/avsluta", b2b: null, b2bMix: null },
+  { name: "Avsluta", mix: "https://soundcloud.com/avsluta", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/monument-podcast/mnmt-395-avsluta" },
   { name: "Carrier b2b Gavsborg", mix: "https://soundcloud.com/driftingover", b2b: "Gavsborg", b2bMix: "https://soundcloud.com/platform/system-mix-001-gavsborg-time-cow" },
   { name: "Cassy", mix: "https://soundcloud.com/dgtl-festival/cassy-dgtl-amsterdam-080423", b2b: null, b2bMix: null },
   { name: "CCL", mix: "https://soundcloud.com/dimensionsfestival/ccl-b2b-dj-voices", b2b: null, b2bMix: null },
   { name: "Chen Ting", mix: null, b2b: null, b2bMix: null },
-  { name: "Colleen", mix: "https://soundcloud.com/colleenplays", b2b: null, b2bMix: null },
+  { name: "Colleen", mix: "https://soundcloud.com/colleenplays", b2b: null, b2bMix: null, otherMix: "https://www.mixcloud.com/TheVinylFactory/vf-mix-14-colleen/" },
   { name: "Cosmo", mix: "https://soundcloud.com/platform/cosmo-vitelli-1", b2b: null, b2bMix: null },
   { name: "Dana Kuehr", mix: "https://soundcloud.com/wakinglifeportugal/dana-kuehr-at-waking-life-2025", b2b: null, b2bMix: null },
   { name: "Dasha Rush", mix: "https://soundcloud.com/draaimolen/dasha-rush-b2b-jakojako-at-draaimolen-festival-2024", b2b: null, b2bMix: null },
@@ -139,34 +141,34 @@ const ARTISTS = [
   { name: "DJ Godfather", mix: "https://soundcloud.com/platform/dj-godfather", b2b: null, b2bMix: null },
   { name: "Dj Masda", mix: "https://soundcloud.com/houghton-festival/dj-masda", b2b: null, b2bMix: null },
   { name: "Dj Spence", mix: "https://soundcloud.com/thelotradio/in-the-open-takeover-with-dj-spence-snp-500-06-09-2024", b2b: null, b2bMix: null },
-  { name: "Dj Tobias", mix: "https://soundcloud.com/djtobias", b2b: null, b2bMix: null },
-  { name: "Dj Trystero", mix: "https://soundcloud.com/djtrystero", b2b: null, b2bMix: null },
+  { name: "Dj Tobias", mix: "https://soundcloud.com/djtobias", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/djtobias/ionstorm006" },
+  { name: "Dj Trystero", mix: "https://soundcloud.com/djtrystero", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/user-392749050/dj-trystero-dj-trystero-tape" },
   { name: "Djrum", mix: "https://soundcloud.com/dkmntl/dekmantel-podcast-267-djrum", b2b: null, b2bMix: null },
-  { name: "Drew McDowall", mix: null, b2b: null, b2bMix: null },
-  { name: "Eduardo de la Calle", mix: "https://soundcloud.com/eduardodelacalle", b2b: null, b2bMix: null },
+  { name: "Drew McDowall", mix: "https://www.youtube.com/watch?v=F74YsmI911A", b2b: null, b2bMix: null },
+  { name: "Eduardo de la Calle", mix: "https://soundcloud.com/eduardodelacalle", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/platform/marc-pinol-b2b-eduarde-de-la-calle" },
   { name: "Edward", mix: "https://soundcloud.com/wakinglifeportugal/edward-at-outro-lado-waking", b2b: null, b2bMix: null },
   { name: "Flo Masse", mix: "https://soundcloud.com/dimensionsfestival/dim299-flo-masse", b2b: null, b2bMix: null },
-  { name: "Garcon", mix: "https://soundcloud.com/garcon", b2b: null, b2bMix: null },
+  { name: "Garcon", mix: "https://soundcloud.com/garcon", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/thelotradio/pacific-mode-with-garc-on-and" },
   { name: "Glossy Mario", mix: "https://soundcloud.com/kioskradio/outsiders-glossy-60497867", b2b: null, b2bMix: null },
   { name: "Gyrofield b2b Upsammy", mix: "https://soundcloud.com/noisily-festival/noisily-live-025-gyrofield", b2b: "Upsammy", b2bMix: "https://soundcloud.com/wakinglifeportugal/upsammy-at-praia-waking-life-24?in=upsammy/sets/jee&si=2d94bf6905c249fd8547c7ef63321c2a&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing" },
-  { name: "Haruka", mix: "https://soundcloud.com/haruka_ptc", b2b: null, b2bMix: null },
-  { name: "HHY & The Kampala Unit", mix: "https://soundcloud.com/hhythekampalaunit", b2b: null, b2bMix: null },
+  { name: "Haruka", mix: "https://soundcloud.com/haruka_ptc", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/buttersessions/butter-mix-61-haruka-future-terror" },
+  { name: "HHY & The Kampala Unit", mix: "https://soundcloud.com/hhythekampalaunit", b2b: null, b2bMix: null, otherMix: "https://www.youtube.com/watch?v=w2dJpZ9bju8" },
   { name: "Jennifer Cardini", mix: "https://soundcloud.com/platform/jennifer-cardini-boiler-room-x-tropico-festival", b2b: null, b2bMix: null },
   { name: "John McEntire", mix: "https://soundcloud.com/sam-prekop", b2b: null, b2bMix: null },
   { name: "Kia", mix: "https://soundcloud.com/wakinglifeportugal/kia-at-waking-life-2025", b2b: null, b2bMix: null },
   { name: "Kia b2b Richard Akingbehin", mix: "https://soundcloud.com/wakinglifeportugal/kia-at-waking-life-2025", b2b: "Richard Akingbehin", b2bMix: "https://soundcloud.com/richard-akingbehin/richard-akingbehin-draaimolen-x-sustain-release-tilburg-may-24" },
   { name: "Konduku", mix: "https://soundcloud.com/houghton-festival/recorded-at-houghton-konduku-2025", b2b: null, b2bMix: null },
   { name: "Kuba'97", mix: "https://soundcloud.com/kuba97/kuba97-soleil-rouge-horst-2025", b2b: null, b2bMix: null },
-  { name: "Laima Adelaide", mix: "https://soundcloud.com/amlia", b2b: null, b2bMix: null },
+  { name: "Laima Adelaide", mix: "https://soundcloud.com/amlia", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/art-bei-ton/054laimaadelaide" },
   { name: "Lawrence", mix: "https://soundcloud.com/lawrence_dial/lawrence-live-garbicz-2018", b2b: null, b2bMix: null },
-  { name: "Magda", mix: "https://soundcloud.com/magda-official", b2b: null, b2bMix: null },
+  { name: "Magda", mix: "https://soundcloud.com/magda-official", b2b: null, b2bMix: null, otherMix: "https://www.youtube.com/watch?v=Ht_RshpD63s" },
   { name: "Mala", mix: "https://soundcloud.com/getdarker/dgital-mystikz-live-at-outlook-festival-2010", b2b: null, b2bMix: null },
   { name: "Marylou", mix: "https://soundcloud.com/crackmagazine/crack-mix-599-marylou", b2b: null, b2bMix: null },
-  { name: "Melchor Productions Ltd b2b Lawrence", mix: "https://soundcloud.com/melchiorproductionsltd", b2b: "Lawrence", b2bMix: "https://soundcloud.com/lawrence_dial/lawrence-live-garbicz-2018" },
+  { name: "Melchor Productions Ltd b2b Lawrence", mix: "https://soundcloud.com/melchiorproductionsltd", b2b: "Lawrence", b2bMix: "https://soundcloud.com/lawrence_dial/lawrence-live-garbicz-2018", otherMix: "https://soundcloud.com/trommelmusic/trommel096-melchior-productions-ltd-live-own-productions-only" },
   { name: "Mike Servito", mix: "https://soundcloud.com/draaimolen/mike-servito-at-draaimolen-festival-2025-5", b2b: null, b2bMix: null },
   { name: "Millie McKee", mix: "https://soundcloud.com/dimensionsfestival/dim335-millie-mckee", b2b: null, b2bMix: null },
   { name: "Nicolini", mix: "https://soundcloud.com/nicoliniskinni4people", b2b: null, b2bMix: null },
-  { name: "NikNak", mix: "https://soundcloud.com/niknakdjmusic", b2b: null, b2bMix: null },
+  { name: "NikNak", mix: "https://soundcloud.com/niknakdjmusic", b2b: null, b2bMix: null, otherMix: "https://www.youtube.com/watch?v=l_HlbAj9g9g" },
   { name: "Nosedrip", mix: "https://soundcloud.com/dkmntl/nosedrip-at-dekmantel-festival-2023", b2b: null, b2bMix: null },
   { name: "OJOO", mix: "https://soundcloud.com/platform/system-mix-084-ojoo-gyal", b2b: null, b2bMix: null },
   { name: "Olgica", mix: "https://soundcloud.com/kleinundhaarig/2024-olgica", b2b: null, b2bMix: null },
@@ -181,13 +183,13 @@ const ARTISTS = [
   { name: "Richard Akingbehin", mix: "https://soundcloud.com/richard-akingbehin/richard-akingbehin-draaimolen-x-sustain-release-tilburg-may-24", b2b: null, b2bMix: null },
   { name: "Rroxymore", mix: "https://soundcloud.com/platform/rroxymore-1", b2b: null, b2bMix: null },
   { name: "Sam Prekop & John Mc Entire", mix: "https://soundcloud.com/sam-prekop", b2b: null, b2bMix: null },
-  { name: "Samuel Rohrer & Elvind Aarset", mix: "https://soundcloud.com/samuel-rohrer-noreia", b2b: null, b2bMix: null },
-  { name: "Serenne", mix: "https://soundcloud.com/serennee", b2b: null, b2bMix: null },
+  { name: "Samuel Rohrer & Elvind Aarset", mix: "https://soundcloud.com/samuel-rohrer-noreia", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/wakinglifeportugal/samuel-rohrer-live-at-cochilo-waking-life-23" },
+  { name: "Serenne", mix: "https://soundcloud.com/serennee", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/isburning/serenne-isburning-176" },
   { name: "Simply Rockers Soundsystem", mix: "https://soundcloud.com/wakinglifeportugal/simply-rockers-sound-system", b2b: null, b2bMix: null },
   { name: "Sina", mix: "https://soundcloud.com/anissina", b2b: null, b2bMix: null },
   { name: "Sterac", mix: "https://soundcloud.com/dreaming-festival/steve-rachmad-aka-sterac-dreaming-festival-2025", b2b: null, b2bMix: null },
-  { name: "Tau Car", mix: "https://soundcloud.com/tau-car", b2b: null, b2bMix: null },
-  { name: "Tiago", mix: null, b2b: null, b2bMix: null },
+  { name: "Tau Car", mix: "https://soundcloud.com/tau-car", b2b: null, b2bMix: null, otherMix: "https://soundcloud.com/192gmbh/tau-car-reptilian-mix-07" },
+  { name: "Tiago", mix: "https://soundcloud.com/dkmntl/tiago-at-dekmantel-selectors-2019", b2b: null, b2bMix: null },
   { name: "Vedic Roots x Simply Rockers", mix: "https://soundcloud.com/wakinglifeportugal/simply-rockers-sound-system", b2b: null, b2bMix: null },
   { name: "Velv.93", mix: "https://soundcloud.com/kioskradio/velv-93-kiosk-radio-22-10-2022", b2b: null, b2bMix: null },
   { name: "Vera", mix: "https://soundcloud.com/wakinglifeportugal/vera-at-outro-lado-waking-life-23", b2b: null, b2bMix: null },
@@ -266,6 +268,9 @@ function render() {
     const mixLink = a.mix
       ? '<a class="mix-link" href="' + a.mix + '" target="_blank">mix link</a>'
       : '';
+    const otherMixLink = a.otherMix
+      ? '<a class="mix-link other-mix" href="' + a.otherMix + '" target="_blank">other mix</a>'
+      : '';
     const b2bLink = a.b2bMix
       ? '<a class="mix-link b2b-mix" href="' + a.b2bMix + '" target="_blank">' + a.b2b + ' mix</a>'
       : '';
@@ -284,6 +289,7 @@ function render() {
         '<div class="artist-row">' +
           '<div class="artist-name">' + a.name + b2bTag + '</div>' +
           mixLink +
+          otherMixLink +
         '</div>' +
         (b2bLink ? '<div class="b2b-links">' + b2bLink + '</div>' : '') +
         tagsHtml +
