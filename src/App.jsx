@@ -238,12 +238,14 @@ export default function App() {
         });
         setStickerKey(k => k + 1);
         setShowSticker(false);
-        requestAnimationFrame(() => {
+        setTimeout(() => {
           requestAnimationFrame(() => {
-            setShowSticker(true);
-            setTimeout(() => setShowSticker(false), 1000);
+            requestAnimationFrame(() => {
+              setShowSticker(true);
+              setTimeout(() => setShowSticker(false), 1000);
+            });
           });
-        });
+        }, 300);
       }
       return next;
     });
