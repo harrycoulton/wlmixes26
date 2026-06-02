@@ -3,7 +3,7 @@ import { ARTISTS } from './data';
 import { useLocalStorage } from './useLocalStorage';
 import './App.css';
 
-const LIKE_STICKERS = ['stickers/likes/chris.png', 'stickers/likes/chris2.png', 'stickers/likes/david.png', 'stickers/likes/hahahah.png', 'stickers/likes/haluki.png', 'stickers/likes/me.png', 'stickers/likes/parisa.png', 'stickers/likes/rory.png', 'stickers/likes/sebo.png'];
+const LIKE_STICKERS = ['stickers/likes/chris.png', 'stickers/likes/chris2.png', 'stickers/likes/david.png', 'stickers/likes/fedeBecauselol.png', 'stickers/likes/hahahah.png', 'stickers/likes/haluki.png', 'stickers/likes/me.png', 'stickers/likes/parisa.png', 'stickers/likes/parisa2.png', 'stickers/likes/rory.png', 'stickers/likes/rory2.png', 'stickers/likes/sebo.png'];
 const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 function encodeLikes(name, likes, tags) {
@@ -138,6 +138,8 @@ export default function App() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [likeSticker, setLikeSticker] = useState(LIKE_STICKERS[0]);
   const [showSticker, setShowSticker] = useState(false);
+  const [stickerSide, setStickerSide] = useState({ edge: 'right', offset: 40 });
+  const [stickerKey, setStickerKey] = useState(0);
 
   useEffect(() => {
     const goOffline = () => setIsOffline(true);
@@ -216,8 +218,18 @@ export default function App() {
       } else {
         next[name] = true;
         setLikeSticker(randomFrom(LIKE_STICKERS));
-        setShowSticker(true);
-        setTimeout(() => setShowSticker(false), 1000);
+        setStickerSide({
+          edge: randomFrom(['top', 'bottom', 'left', 'right']),
+          offset: Math.floor(Math.random() * 60) + 20, // 20-80%
+        });
+        setStickerKey(k => k + 1);
+        setShowSticker(false);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setShowSticker(true);
+            setTimeout(() => setShowSticker(false), 1000);
+          });
+        });
       }
       return next;
     });
@@ -413,9 +425,15 @@ export default function App() {
         )}
       </div>
       <img
+        key={stickerKey}
         src={`./${likeSticker}`}
         alt=""
-        className={`chris-sticker${showSticker ? ' visible' : ''}`}
+        className={`sticker sticker-${stickerSide.edge}${showSticker ? ' visible' : ''}`}
+        style={
+          stickerSide.edge === 'left' || stickerSide.edge === 'right'
+            ? { top: `${stickerSide.offset}%` }
+            : { left: `${stickerSide.offset}%` }
+        }
       />
     </>
   );

@@ -213,18 +213,30 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
   background: rgba(167, 139, 250, 0.1); padding: 2px 8px;
   border-radius: 4px;
 }
-.chris-sticker {
+.sticker {
   position: fixed;
-  bottom: 40%;
-  right: -120px;
   width: 90px;
   height: auto;
-  transform: rotate(-90deg);
-  transform-origin: center center;
-  transition: right 0.3s ease-out;
   pointer-events: none;
   z-index: 100;
 }
-.chris-sticker.visible {
-  right: -15px;
+.sticker-right {
+  transform: rotate(-90deg);
+  right: -120px; transition: right 0.3s ease-out;
 }
+.sticker-right.visible { right: -15px; }
+.sticker-left {
+  transform: rotate(90deg);
+  left: -120px; transition: left 0.3s ease-out;
+}
+.sticker-left.visible { left: -15px; }
+.sticker-top {
+  transform: translateX(-50%) rotate(180deg);
+  top: -120px; transition: top 0.3s ease-out;
+}
+.sticker-top.visible { top: -15px; }
+.sticker-bottom {
+  transform: translateX(-50%);
+  bottom: -120px; transition: bottom 0.3s ease-out;
+}
+.sticker-bottom.visible { bottom: -15px; }
