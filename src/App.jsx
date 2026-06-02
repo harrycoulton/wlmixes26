@@ -1,36 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ARTISTS } from './data';
 import { useLocalStorage } from './useLocalStorage';
 import './App.css';
 
-function getMixLabel(url) {
-  if (!url) return 'Mix';
-  if (url.includes('wakinglife')) return 'Waking Life';
-  if (url.includes('draaimolen')) return 'Draaimolen';
-  if (url.includes('houghton')) return 'Houghton';
-  if (url.includes('dkmntl') || url.includes('dekmantel')) return 'Dekmantel';
-  if (url.includes('horst')) return 'Horst';
-  if (url.includes('dimensionsfestival')) return 'Dimensions';
-  if (url.includes('platform/') || url.includes('boiler')) return 'Boiler Room';
-  if (url.includes('dgtl')) return 'DGTL';
-  if (url.includes('kioskradio')) return 'Kiosk Radio';
-  if (url.includes('crackmagazine')) return 'Crack Mix';
-  if (url.includes('noisily')) return 'Noisily';
-  if (url.includes('dreaming-festival')) return 'Dreaming Fest';
-  if (url.includes('getdarker')) return 'Outlook';
-  if (url.includes('kleinundhaarig')) return 'KuH Fest';
-  if (url.includes('sunwaves') || url.includes('cel-ce-asteapta')) return 'Sunwaves';
-  if (url.includes('thelotradio')) return 'Lot Radio';
-  if (url.includes('garbicz')) return 'Garbicz';
-  if (url.includes('musicmanrecords')) return 'Music Man';
-  try {
-    const path = new URL(url).pathname;
-    if (path.split('/').length <= 2) return 'Profile';
-  } catch {}
-  return 'Mix';
-}
-
-function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag }) {
+function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag, friendLikers }) {
   const isB2b = artist.b2b != null;
 
   return (
@@ -72,6 +45,13 @@ function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag }
           ))}
           <button className="add-tag-btn" aria-label="Add tag" onClick={onAddTag}>+</button>
         </div>
+        {friendLikers.length > 0 && (
+          <div className="friend-likers">
+            {friendLikers.map(name => (
+              <span key={name} className="friend-badge">{name}</span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -82,14 +62,32 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [likes, setLikes] = useLocalStorage('wl2026-likes', {});
   const [allTags, setAllTags] = useLocalStorage('wl2026-tags', {});
+  const [friends, setFriends] = useLocalStorage('wl2026-friends', []);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const fileInputRef = useRef(null);
 
   const q = search.toLowerCase();
   let filtered = ARTISTS.filter(a => a.name.toLowerCase().includes(q));
-  if (tab === 'liked') filtered = filtered.filter(a => likes[a.name]);
 
-  const countText = tab === 'liked'
-    ? `${filtered.length} liked artist${filtered.length !== 1 ? 's' : ''}`
-    : `${filtered.length} of ${ARTISTS.length} artists`;
+  if (tab === 'liked') {
+    filtered = filtered.filter(a => likes[a.name]);
+  } else if (tab === 'friends' && selectedFriend) {
+    const friend = friends.find(f => f.name === selectedFriend);
+    if (friend) filtered = filtered.filter(a => friend.likes[a.name]);
+  }
+
+  const friendLikersFor = (artistName) => {
+    return friends.filter(f => f.likes[artistName]).map(f => f.name);
+  };
+
+  let countText;
+  if (tab === 'friends' && selectedFriend) {
+    countText = `${filtered.length} liked by ${selectedFriend}`;
+  } else if (tab === 'liked') {
+    countText = `${filtered.length} liked artist${filtered.length !== 1 ? 's' : ''}`;
+  } else {
+    countText = `${filtered.length} of ${ARTISTS.length} artists`;
+  }
 
   const toggleLike = (name) => {
     setLikes(prev => {
@@ -120,6 +118,52 @@ export default function App() {
     });
   };
 
+  const exportLikes = () => {
+    const name = prompt('Your name (for your friends to see):');
+    if (!name || !name.trim()) return;
+    const data = { name: name.trim(), likes };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wl2026-${name.trim().toLowerCase().replace(/\s+/g, '-')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importFriend = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        if (!data.name || !data.likes) {
+          alert('Invalid file format.');
+          return;
+        }
+        setFriends(prev => {
+          const existing = prev.filter(f => f.name !== data.name);
+          return [...existing, { name: data.name, likes: data.likes }];
+        });
+        setSelectedFriend(data.name);
+        setTab('friends');
+      } catch {
+        alert('Could not read file.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const removeFriend = (name) => {
+    setFriends(prev => prev.filter(f => f.name !== name));
+    if (selectedFriend === name) {
+      setSelectedFriend(null);
+      setTab('all');
+    }
+  };
+
   return (
     <>
       <header>
@@ -136,7 +180,7 @@ export default function App() {
             className={`tab${tab === 'all' ? ' active' : ''}`}
             onClick={() => setTab('all')}
           >
-            All Artists
+            All
           </button>
           <button
             className={`tab${tab === 'liked' ? ' active' : ''}`}
@@ -144,15 +188,62 @@ export default function App() {
           >
             Liked
           </button>
+          <button
+            className={`tab${tab === 'friends' ? ' active' : ''}`}
+            onClick={() => setTab('friends')}
+          >
+            Friends
+          </button>
         </div>
       </header>
+
+      {tab === 'friends' && (
+        <div className="friends-bar">
+          <div className="friends-list">
+            {friends.map(f => (
+              <div key={f.name} className="friend-chip-wrapper">
+                <button
+                  className={`friend-chip${selectedFriend === f.name ? ' active' : ''}`}
+                  onClick={() => setSelectedFriend(selectedFriend === f.name ? null : f.name)}
+                >
+                  {f.name}
+                </button>
+                <button className="friend-remove" onClick={() => removeFriend(f.name)}>&times;</button>
+              </div>
+            ))}
+          </div>
+          <div className="share-actions">
+            <button className="share-btn" onClick={exportLikes}>Export My Likes</button>
+            <button className="share-btn" onClick={() => fileInputRef.current?.click()}>Import Friend</button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={importFriend}
+              hidden
+            />
+          </div>
+        </div>
+      )}
+
       <div className="count">{countText}</div>
       <div className="list">
-        {filtered.length === 0 ? (
+        {tab === 'friends' && !selectedFriend && friends.length === 0 ? (
+          <div className="empty">
+            No friends imported yet.<br />
+            Export your likes and share the file, or import a friend's file.
+          </div>
+        ) : tab === 'friends' && !selectedFriend && friends.length > 0 ? (
+          <div className="empty">
+            Select a friend above to see their likes.
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="empty">
             {tab === 'liked'
               ? <>No liked artists yet.<br />Tap the heart on artists you want to check out.</>
-              : 'No artists match your search.'}
+              : tab === 'friends'
+                ? `${selectedFriend} hasn't liked any artists matching your search.`
+                : 'No artists match your search.'}
           </div>
         ) : (
           filtered.map(a => (
@@ -164,6 +255,7 @@ export default function App() {
               onToggleLike={() => toggleLike(a.name)}
               onAddTag={() => addTag(a.name)}
               onRemoveTag={(tag) => removeTag(a.name, tag)}
+              friendLikers={friendLikersFor(a.name)}
             />
           ))
         )}
