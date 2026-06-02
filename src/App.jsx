@@ -3,7 +3,7 @@ import { ARTISTS } from './data';
 import { useLocalStorage } from './useLocalStorage';
 import './App.css';
 
-const LIKE_STICKERS = ['stickers/likes/chris.png', 'stickers/likes/chris2.png', 'stickers/likes/david.png', 'stickers/likes/fedeBecauselol.png', 'stickers/likes/hahahah.png', 'stickers/likes/haluki.png', 'stickers/likes/me.png', 'stickers/likes/parisa.png', 'stickers/likes/parisa2.png', 'stickers/likes/rory.png', 'stickers/likes/rory2.png', 'stickers/likes/sebo.png'];
+const LIKE_STICKERS = ['stickers/likes/chris.png', 'stickers/likes/chris2.png', 'stickers/likes/chrolveigtopher.png', 'stickers/likes/david.png', 'stickers/likes/fedeBecauselol.png', 'stickers/likes/hahahah.png', 'stickers/likes/haluki.png', 'stickers/likes/lea.png', 'stickers/likes/me.png', 'stickers/likes/parisa.png', 'stickers/likes/parisa2.png', 'stickers/likes/rory.png', 'stickers/likes/rory2.png', 'stickers/likes/sebo.png', 'stickers/likes/sebo2.png'];
 const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 function encodeLikes(name, likes, tags) {
