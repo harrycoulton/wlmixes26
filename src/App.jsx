@@ -136,7 +136,8 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [importNotice, setImportNotice] = useState(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [likeSticker, setLikeSticker] = useState(null);
+  const [likeSticker, setLikeSticker] = useState(LIKE_STICKERS[0]);
+  const [showSticker, setShowSticker] = useState(false);
 
   useEffect(() => {
     const goOffline = () => setIsOffline(true);
@@ -215,7 +216,8 @@ export default function App() {
       } else {
         next[name] = true;
         setLikeSticker(randomFrom(LIKE_STICKERS));
-        setTimeout(() => setLikeSticker(null), 1000);
+        setShowSticker(true);
+        setTimeout(() => setShowSticker(false), 1000);
       }
       return next;
     });
@@ -410,9 +412,11 @@ export default function App() {
           ))
         )}
       </div>
-      {likeSticker && (
-        <img src={`./${likeSticker}`} alt="" className="chris-sticker visible" />
-      )}
+      <img
+        src={`./${likeSticker}`}
+        alt=""
+        className={`chris-sticker${showSticker ? ' visible' : ''}`}
+      />
     </>
   );
 }
