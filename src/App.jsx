@@ -1,7 +1,35 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ARTISTS } from './data';
 import { useLocalStorage } from './useLocalStorage';
 import './App.css';
+
+function encodeLikes(name, likes) {
+  const indices = ARTISTS
+    .map((a, i) => likes[a.name] ? i : -1)
+    .filter(i => i >= 0);
+  const params = new URLSearchParams();
+  params.set('friend', name);
+  params.set('likes', indices.join(','));
+  return `${window.location.origin}${window.location.pathname}#${params.toString()}`;
+}
+
+function decodeFriendFromHash(hash) {
+  if (!hash || hash.length < 2) return null;
+  try {
+    const params = new URLSearchParams(hash.slice(1));
+    const name = params.get('friend');
+    const likesStr = params.get('likes');
+    if (!name || !likesStr) return null;
+    const likes = {};
+    likesStr.split(',').forEach(i => {
+      const idx = parseInt(i, 10);
+      if (ARTISTS[idx]) likes[ARTISTS[idx].name] = true;
+    });
+    return { name, likes };
+  } catch {
+    return null;
+  }
+}
 
 function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag, friendLikers }) {
   const isB2b = artist.b2b != null;
@@ -64,7 +92,21 @@ export default function App() {
   const [allTags, setAllTags] = useLocalStorage('wl2026-tags', {});
   const [friends, setFriends] = useLocalStorage('wl2026-friends', []);
   const [selectedFriend, setSelectedFriend] = useState(null);
-  const fileInputRef = useRef(null);
+  const [copied, setCopied] = useState(false);
+  const [importNotice, setImportNotice] = useState(null);
+
+  useEffect(() => {
+    const friend = decodeFriendFromHash(window.location.hash);
+    if (!friend) return;
+    setFriends(prev => {
+      const existing = prev.filter(f => f.name !== friend.name);
+      return [...existing, friend];
+    });
+    setSelectedFriend(friend.name);
+    setTab('friends');
+    setImportNotice(friend.name);
+    window.history.replaceState(null, '', window.location.pathname);
+  }, []);
 
   const q = search.toLowerCase();
   let filtered = ARTISTS.filter(a => a.name.toLowerCase().includes(q));
@@ -118,49 +160,25 @@ export default function App() {
     });
   };
 
-  const exportLikes = () => {
+  const shareLikes = async () => {
     const name = prompt('Your name (for your friends to see):');
     if (!name || !name.trim()) return;
-    const data = { name: name.trim(), likes };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `wl2026-${name.trim().toLowerCase().replace(/\s+/g, '-')}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const importFriend = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (evt) => {
+    const url = encodeLikes(name.trim(), likes);
+    if (navigator.share) {
       try {
-        const data = JSON.parse(evt.target.result);
-        if (!data.name || !data.likes) {
-          alert('Invalid file format.');
-          return;
-        }
-        setFriends(prev => {
-          const existing = prev.filter(f => f.name !== data.name);
-          return [...existing, { name: data.name, likes: data.likes }];
-        });
-        setSelectedFriend(data.name);
-        setTab('friends');
-      } catch {
-        alert('Could not read file.');
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
+        await navigator.share({ title: `${name.trim()}'s WL2026 Likes`, url });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    }
   };
 
   const removeFriend = (name) => {
     setFriends(prev => prev.filter(f => f.name !== name));
     if (selectedFriend === name) {
       setSelectedFriend(null);
-      setTab('all');
     }
   };
 
@@ -197,6 +215,13 @@ export default function App() {
         </div>
       </header>
 
+      {importNotice && (
+        <div className="import-notice">
+          Added {importNotice}'s likes! This is a snapshot — it won't update automatically if they change their likes.
+          <button className="notice-dismiss" onClick={() => setImportNotice(null)}>&times;</button>
+        </div>
+      )}
+
       {tab === 'friends' && (
         <div className="friends-bar">
           <div className="friends-list">
@@ -212,17 +237,12 @@ export default function App() {
               </div>
             ))}
           </div>
-          <div className="share-actions">
-            <button className="share-btn" onClick={exportLikes}>Export My Likes</button>
-            <button className="share-btn" onClick={() => fileInputRef.current?.click()}>Import Friend</button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              onChange={importFriend}
-              hidden
-            />
-          </div>
+          <button className="share-btn" onClick={shareLikes}>
+            {copied ? 'Link copied!' : 'Share My Likes'}
+          </button>
+          <p className="share-hint">
+            Copies a link to your clipboard. Send it to a friend — when they open it, your likes will be added to their Friends tab. This is a one-time snapshot and won't sync automatically.
+          </p>
         </div>
       )}
 
@@ -230,8 +250,8 @@ export default function App() {
       <div className="list">
         {tab === 'friends' && !selectedFriend && friends.length === 0 ? (
           <div className="empty">
-            No friends imported yet.<br />
-            Export your likes and share the file, or import a friend's file.
+            No friends added yet.<br />
+            Share your likes link with a friend, or ask them to send you theirs.
           </div>
         ) : tab === 'friends' && !selectedFriend && friends.length > 0 ? (
           <div className="empty">
