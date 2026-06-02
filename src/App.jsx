@@ -3,6 +3,9 @@ import { ARTISTS } from './data';
 import { useLocalStorage } from './useLocalStorage';
 import './App.css';
 
+const LIKE_STICKERS = ['stickers/likes/chris.png', 'stickers/likes/chris2.png', 'stickers/likes/david.png', 'stickers/likes/hahahah.png', 'stickers/likes/haluki.png', 'stickers/likes/me.png', 'stickers/likes/parisa.png', 'stickers/likes/rory.png', 'stickers/likes/sebo.png'];
+const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
 function encodeLikes(name, likes, tags) {
   const indices = ARTISTS
     .map((a, i) => likes[a.name] ? i : -1)
@@ -133,6 +136,7 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [importNotice, setImportNotice] = useState(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [likeSticker, setLikeSticker] = useState(null);
 
   useEffect(() => {
     const goOffline = () => setIsOffline(true);
@@ -206,8 +210,13 @@ export default function App() {
   const toggleLike = (name) => {
     setLikes(prev => {
       const next = { ...prev };
-      if (next[name]) delete next[name];
-      else next[name] = true;
+      if (next[name]) {
+        delete next[name];
+      } else {
+        next[name] = true;
+        setLikeSticker(randomFrom(LIKE_STICKERS));
+        setTimeout(() => setLikeSticker(null), 1000);
+      }
       return next;
     });
   };
@@ -215,8 +224,11 @@ export default function App() {
   const toggleHidden = (name) => {
     setHiddenArtists(prev => {
       const next = { ...prev };
-      if (next[name]) delete next[name];
-      else next[name] = true;
+      if (next[name]) {
+        delete next[name];
+      } else {
+        next[name] = true;
+      }
       return next;
     });
   };
@@ -398,6 +410,9 @@ export default function App() {
           ))
         )}
       </div>
+      {likeSticker && (
+        <img src={`./${likeSticker}`} alt="" className="chris-sticker visible" />
+      )}
     </>
   );
 }

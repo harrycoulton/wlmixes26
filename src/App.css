@@ -213,3 +213,18 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
   background: rgba(167, 139, 250, 0.1); padding: 2px 8px;
   border-radius: 4px;
 }
+.chris-sticker {
+  position: fixed;
+  bottom: 40%;
+  right: -80px;
+  width: 60px;
+  height: auto;
+  transform: rotate(-90deg);
+  transform-origin: center center;
+  transition: right 0.2s ease-out;
+  pointer-events: none;
+  z-index: 100;
+}
+.chris-sticker.visible {
+  right: -10px;
+}
