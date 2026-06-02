@@ -131,11 +131,11 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
 .friend-remove:active { color: #ff4444; }
 .share-btn {
   width: 100%; padding: 10px;
-  background: #161616; border: 1px solid #2a2a2a; border-radius: 10px;
-  color: #e0e0e0; font-size: 13px; font-weight: 500;
+  background: #1a2a1a; border: 1px solid #2a3a2a; border-radius: 10px;
+  color: #8bc34a; font-size: 13px; font-weight: 500;
   cursor: pointer; transition: all 0.15s;
 }
-.share-btn:active { background: #2a2a2a; border-color: #ff6b35; }
+.share-btn:active { background: #2a3a2a; border-color: #8bc34a; }
 .share-hint {
   font-size: 11px; color: #555; margin-top: 8px; line-height: 1.4;
 }

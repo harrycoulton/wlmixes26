@@ -132,6 +132,7 @@ export default function App() {
     setSelectedFriend(friend.name);
     setTab('friends');
     setImportNotice(friend.name);
+    setTimeout(() => setImportNotice(null), 30000);
     window.history.replaceState(null, '', window.location.pathname);
   }, []);
 
