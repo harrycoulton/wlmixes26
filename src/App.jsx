@@ -3,13 +3,21 @@ import { ARTISTS } from './data';
 import { useLocalStorage } from './useLocalStorage';
 import './App.css';
 
-function encodeLikes(name, likes) {
+function encodeLikes(name, likes, tags) {
   const indices = ARTISTS
     .map((a, i) => likes[a.name] ? i : -1)
     .filter(i => i >= 0);
   const params = new URLSearchParams();
   params.set('friend', name);
   params.set('likes', indices.join(','));
+  // encode tags as idx:tag1,tag2;idx:tag1,tag2
+  const tagParts = [];
+  ARTISTS.forEach((a, i) => {
+    if (tags[a.name] && tags[a.name].length > 0) {
+      tagParts.push(`${i}:${tags[a.name].join(',')}`);
+    }
+  });
+  if (tagParts.length > 0) params.set('tags', tagParts.join(';'));
   return `${window.location.origin}${window.location.pathname}#${params.toString()}`;
 }
 
@@ -25,13 +33,22 @@ function decodeFriendFromHash(hash) {
       const idx = parseInt(i, 10);
       if (ARTISTS[idx]) likes[ARTISTS[idx].name] = true;
     });
-    return { name, likes };
+    const tags = {};
+    const tagsStr = params.get('tags');
+    if (tagsStr) {
+      tagsStr.split(';').forEach(part => {
+        const [idxStr, ...rest] = part.split(':');
+        const idx = parseInt(idxStr, 10);
+        if (ARTISTS[idx]) tags[ARTISTS[idx].name] = rest.join(':').split(',');
+      });
+    }
+    return { name, likes, tags };
   } catch {
     return null;
   }
 }
 
-function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag, friendLikers }) {
+function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag, friendLikers, friendTags }) {
   const isB2b = artist.b2b != null;
 
   return (
@@ -75,9 +92,19 @@ function ArtistCard({ artist, liked, tags, onToggleLike, onAddTag, onRemoveTag, 
         </div>
         {friendLikers.length > 0 && (
           <div className="friend-likers">
+            <span className="liked-by-label">Liked by:</span>
             {friendLikers.map(name => (
               <span key={name} className="friend-badge">{name}</span>
             ))}
+          </div>
+        )}
+        {friendTags.length > 0 && (
+          <div className="friend-tags">
+            {friendTags.map(({ friend, tags }) =>
+              tags.map(t => (
+                <span key={`${friend}-${t}`} className="friend-tag">{friend}: {t}</span>
+              ))
+            )}
           </div>
         )}
       </div>
@@ -122,6 +149,12 @@ export default function App() {
     return friends.filter(f => f.likes[artistName]).map(f => f.name);
   };
 
+  const friendTagsFor = (artistName) => {
+    return friends
+      .filter(f => f.tags && f.tags[artistName] && f.tags[artistName].length > 0)
+      .map(f => ({ friend: f.name, tags: f.tags[artistName] }));
+  };
+
   let countText;
   if (tab === 'friends' && selectedFriend) {
     countText = `${filtered.length} liked by ${selectedFriend}`;
@@ -163,7 +196,7 @@ export default function App() {
   const shareLikes = async () => {
     const name = prompt('Your name (for your friends to see):');
     if (!name || !name.trim()) return;
-    const url = encodeLikes(name.trim(), likes);
+    const url = encodeLikes(name.trim(), likes, allTags);
     if (navigator.share) {
       try {
         await navigator.share({ title: `${name.trim()}'s WL2026 Likes`, url });
@@ -276,6 +309,7 @@ export default function App() {
               onAddTag={() => addTag(a.name)}
               onRemoveTag={(tag) => removeTag(a.name, tag)}
               friendLikers={friendLikersFor(a.name)}
+              friendTags={friendTagsFor(a.name)}
             />
           ))
         )}

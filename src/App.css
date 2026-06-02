@@ -152,8 +152,19 @@ h1 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
 .friend-likers {
   display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;
 }
+.liked-by-label {
+  font-size: 10px; color: #666;
+}
 .friend-badge {
   font-size: 10px; color: #ff6b35;
   background: rgba(255, 107, 53, 0.1); padding: 2px 8px;
   border-radius: 10px;
+}
+.friend-tags {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;
+}
+.friend-tag {
+  font-size: 10px; color: #a78bfa;
+  background: rgba(167, 139, 250, 0.1); padding: 2px 8px;
+  border-radius: 4px;
 }
